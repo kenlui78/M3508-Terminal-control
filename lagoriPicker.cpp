@@ -27,14 +27,14 @@ LagoriPicker::LagoriPicker(CAN* pickerCAN){
 void LagoriPicker::demonstration(unsigned char stage){
     switch (stage) {
     case 0:
-        picker.set_position(0, 60 * 19);
-        picker.set_position(1, 60 * 19);
-        picker.set_position(2, 60 * 19);
-    break;
-    case 1:
         picker.set_position(0, 0 * 19);
         picker.set_position(1, 0 * 19);
         picker.set_position(2, 0 * 19);
+    break;
+    case 1:
+        picker.set_position(0, 60 * 19);
+        picker.set_position(1, 120 * 19);
+        picker.set_position(2, 180 * 19);
     break;
     default:
     break;
