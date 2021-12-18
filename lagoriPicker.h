@@ -1,5 +1,6 @@
 #include "m3508Lib/m3508.h"
 #include "mbed.h"
+#include "motorUI.h"
 #include <cstdint>
 
 class LagoriPicker{
@@ -11,4 +12,6 @@ class LagoriPicker{
     void setVelocity(int, int);
     private:
     m3508 picker;
+    MotorUI motorUI;
 };
+
