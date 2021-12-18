@@ -1,6 +1,8 @@
 #include "lagoriPicker.h"
 #include "mbed.h"
 #include "stdint.h"
+#define gearRatio 22.75
+#define currentRation 819.2
 LagoriPicker::LagoriPicker(CAN* pickerCAN){
     picker.m3508_init(pickerCAN);
 
@@ -27,18 +29,26 @@ LagoriPicker::LagoriPicker(CAN* pickerCAN){
 void LagoriPicker::demonstration(unsigned char stage){
     switch (stage) {
     case 0:
-        picker.set_position(0, 0 * 19);
-        picker.set_position(1, 0 * 19);
-        picker.set_position(2, 0 * 19);
+        picker.set_position(0, 0 * gearRatio);
+        picker.set_position(1, 0 * gearRatio);
+        picker.set_position(2, 0 * gearRatio);
     break;
     case 1:
-        picker.set_position(0, 60 * 19);
-        picker.set_position(1, 120 * 19);
-        picker.set_position(2, 180 * 19);
+        picker.set_position(0, 60 * gearRatio);
+        picker.set_position(1, 120 * gearRatio);
+        picker.set_position(2, 180 * gearRatio);
     break;
     default:
     break;
     }
     picker.c620_read();
+    picker.c620_calc();
+}
+int16_t LagoriPicker::getCurrent(int motor_id){
+    picker.c620_read();
+    return picker.read_current[motor_id];
+}
+void LagoriPicker::setVelocity(int motor_id, int speed){
+    picker.set_velocity(motor_id, speed * 250);
     picker.c620_calc();
 }
