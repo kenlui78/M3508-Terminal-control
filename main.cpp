@@ -11,7 +11,7 @@ DigitalOut onBoardLed(LED1);
 
 Timer g_userTimer;
 void changeStage(){
-    if (duration_cast<milliseconds>(g_userTimer.elapsed_time()).count() > 1000) {
+    if (duration_cast<milliseconds>(g_userTimer.elapsed_time()).count() > 200) {
         //printf("Change stage\n");
         g_userTimer.reset();
         onBoardLed = !onBoardLed;

@@ -25,6 +25,8 @@ LagoriPicker::LagoriPicker(CAN* pickerCAN){
     // set the current limit, overcurrent may destory the driver
     picker.motor_max_current = 16000; // 10000 max for c610+2006 16000 max for c620
     picker.set_position(0, 0);// set starting position as 0
+    motorUpdater.start(callback(this, &LagoriPicker::motorUpdate));
+
 }
 void LagoriPicker::demonstration(unsigned char stage){
     switch (stage) {
@@ -50,5 +52,10 @@ int16_t LagoriPicker::getCurrent(int motor_id){
 }
 void LagoriPicker::setVelocity(int motor_id, int speed){
     picker.set_velocity(motor_id, speed * 250);
+    picker.c620_calc();
+}
+
+void LagoriPicker::motorUpdate(){
+    picker.set_velocity(0, motorUI.GetVelocityValue());
     picker.c620_calc();
 }
