@@ -2,6 +2,7 @@
 #include "mbed.h"
 #include <cstdint>
 #include <string>
+#include "lagoriPicker.h"
 
 enum UiState{
     startUpPage,
@@ -15,17 +16,19 @@ class MotorUI{
     MotorUI();
     int16_t GetVelocityValue();
     private:
+    LagoriPicker lagoriPicker;
     UiState uiState;
     BufferedSerial pc;
-    Thread pcIn;
-    //Ticker chater;
-    void messageTxRx(void);
-    //void chat(void);
+    Thread thread;
+    void mainThread(void);
+    UiState inputVelocity(char);
+    Ticker ticker;
+
     int16_t velocityValue;
     char velocityString[8];
     int velocityStringCounter;
-    std::string errorMessage;
     char newlineMessage;
+    std::string errorMessage;
     std::string mainManuMessage;
     std::string notCompletedMessage;
 };

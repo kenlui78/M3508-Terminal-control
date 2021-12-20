@@ -1,6 +1,6 @@
 #include "mbed.h"
 #include <cstdio>
-#include "lagoriPicker.h"
+#include "motorUI.h"
 
 using namespace std::chrono;
 
@@ -38,8 +38,7 @@ void currentDrive(LagoriPicker* lagoriPicker){
 
 int main()
 {
-    CAN ptrPickerCAN(PA_11, PA_12, 1000000);
-    LagoriPicker lagoriPicker(&ptrPickerCAN);
+    MotorUI motorUi;
     g_userTimer.start();
     InterruptIn userButton(PC_13);
     userButton.rise(&changeStage);

@@ -3,9 +3,8 @@
 #include "stdint.h"
 #define gearRatio 22.75
 #define currentRation 819.2
-LagoriPicker::LagoriPicker(CAN* pickerCAN){
-    picker.m3508_init(pickerCAN);
-
+LagoriPicker::LagoriPicker() : canBus(PA_11, PA_12, 1000000){
+    picker.m3508_init(&canBus);
     //suggest position mode setting 
     picker.set_i_pid_param(0, 1.5, 0.001, 0.000005); // Torque PID W1
     picker.set_v_pid_param(0, 5.5, 0.001, 0.005);  // Velocity PID W1
@@ -25,10 +24,8 @@ LagoriPicker::LagoriPicker(CAN* pickerCAN){
     // set the current limit, overcurrent may destory the driver
     picker.motor_max_current = 16000; // 10000 max for c610+2006 16000 max for c620
     picker.set_position(0, 0);// set starting position as 0
-    motorUpdater.start(callback(this, &LagoriPicker::motorUpdate));
-
 }
-void LagoriPicker::demonstration(unsigned char stage){
+/*void LagoriPicker::demonstration(unsigned char stage){
     switch (stage) {
     case 0:
         picker.set_position(0, 0 * gearRatio);
@@ -45,17 +42,12 @@ void LagoriPicker::demonstration(unsigned char stage){
     }
     picker.c620_read();
     picker.c620_calc();
-}
+}*/
 int16_t LagoriPicker::getCurrent(int motor_id){
     picker.c620_read();
     return picker.read_current[motor_id];
 }
 void LagoriPicker::setVelocity(int motor_id, int speed){
-    picker.set_velocity(motor_id, speed * 250);
-    picker.c620_calc();
-}
-
-void LagoriPicker::motorUpdate(){
-    picker.set_velocity(0, motorUI.GetVelocityValue());
+    picker.set_velocity(motor_id, speed);
     picker.c620_calc();
 }
