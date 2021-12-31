@@ -174,9 +174,9 @@ void m3508::c620_calc() // Execution frequency 100Hz
       required_current[motor_index] = (int16_t)constrain(required_current[motor_index],profile_torque_CW[motor_index],profile_torque_CCW[motor_index]);
 
       // current loop
-      i_pid[motor_index].P = required_current[motor_index] - read_current[motor_index];
-      i_pid[motor_index].I += i_pid[motor_index].P * dt;
-      i_pid[motor_index].D = (i_pid[motor_index].P - i_pid[motor_index].prev_err) / dt;
+      //i_pid[motor_index].P = required_current[motor_index] - read_current[motor_index];
+      //i_pid[motor_index].I += i_pid[motor_index].P * dt;
+      //i_pid[motor_index].D = (i_pid[motor_index].P - i_pid[motor_index].prev_err) / dt;
 
       //Store the error      
       i_pid[motor_index].prev_err = i_pid[motor_index].P;
@@ -212,9 +212,9 @@ void m3508::c620_calc() // Execution frequency 100Hz
       required_current[motor_index] = (int16_t)constrain(required_current[motor_index],profile_torque_CW[motor_index],profile_torque_CCW[motor_index]);
 
       // current loop
-      i_pid[motor_index].P = required_current[motor_index] - read_current[motor_index];
-      i_pid[motor_index].I += i_pid[motor_index].P * dt;
-      i_pid[motor_index].D = (i_pid[motor_index].P - i_pid[motor_index].prev_err) / dt;
+      //i_pid[motor_index].P = required_current[motor_index] - read_current[motor_index];
+      //i_pid[motor_index].I += i_pid[motor_index].P * dt;
+      //i_pid[motor_index].D = (i_pid[motor_index].P - i_pid[motor_index].prev_err) / dt;
 
       //Store the error      
       i_pid[motor_index].prev_err = i_pid[motor_index].P;

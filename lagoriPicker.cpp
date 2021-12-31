@@ -3,18 +3,12 @@
 #include "stdint.h"
 #define gearRatio 22.75
 #define currentRation 819.2
-LagoriPicker::LagoriPicker() : canBus(PA_11, PA_12, 1000000){
+LagoriPicker::LagoriPicker() : canBus(PA_11, PA_12, 1000000), pc(USBTX, USBRX){
     picker.m3508_init(&canBus);
-    //suggest position mode setting 
-    picker.set_i_pid_param(0, 1.5, 0.001, 0.000005); // Torque PID W1
-    picker.set_v_pid_param(0, 5.5, 0.001, 0.005);  // Velocity PID W1
-    picker.set_p_pid_param(0, 12.5, 0.4, 0.35);     // position PID W1
-    picker.set_i_pid_param(1, 1.5, 0.001, 0.000005); // Torque PID W1
-    picker.set_v_pid_param(1, 5.5, 0.001, 0.005);  // Velocity PID W1
-    picker.set_p_pid_param(1, 12.5, 0.4, 0.35);     // position PID W1
-    picker.set_i_pid_param(2, 1.5, 0.001, 0.000005); // Torque PID W1
-    picker.set_v_pid_param(2, 5.5, 0.001, 0.005);  // Velocity PID W1
-    picker.set_p_pid_param(2, 12.5, 0.4, 0.35);     // position PID W1
+
+    picker.set_i_pid_param(0, 1, 0.000, 0.000000); // Torque PID W1
+    picker.set_v_pid_param(0, 1, 0.000, 0.000);  // Velocity PID W1
+    picker.set_p_pid_param(0, 1, 0.0, 0.00);     // position PID W1
 
     // set the LP filter of the desire control
     picker.profile_velocity_CCW[0] = 12000;//Maximum is 12000 for c620 and 10000 for c610
@@ -22,32 +16,72 @@ LagoriPicker::LagoriPicker() : canBus(PA_11, PA_12, 1000000){
     picker.profile_torque_CCW[0] = 16000; //Maximum is 16000 for c620 and 10000 for c610
     picker.profile_torque_CW[0] = -16000;
     // set the current limit, overcurrent may destory the driver
-    picker.motor_max_current = 16000; // 10000 max for c610+2006 16000 max for c620
+    picker.motor_max_current = 10000; // 10000 max for c610+2006 16000 max for c620
     picker.set_position(0, 0);// set starting position as 0
+
+    pc.set_baud(115200);
+
+    int targetValue = 0;
+    int outputCurrent = 0;
 }
-/*void LagoriPicker::demonstration(unsigned char stage){
-    switch (stage) {
-    case 0:
-        picker.set_position(0, 0 * gearRatio);
-        picker.set_position(1, 0 * gearRatio);
-        picker.set_position(2, 0 * gearRatio);
-    break;
-    case 1:
-        picker.set_position(0, 60 * gearRatio);
-        picker.set_position(1, 120 * gearRatio);
-        picker.set_position(2, 180 * gearRatio);
-    break;
-    default:
-    break;
+
+void LagoriPicker::pcIn(){
+    static char buffer[32] = {0};
+    static char inputString[32] = {0};
+    static int inputValue = 0;
+    static int inputStringCounter = 0;
+    bool valueIsEnter = false;
+    if(pc.readable()){
+        pc.read(buffer, 1);
+        pc.write(buffer, 1);
+        char inputChar = buffer[0];
+        switch(inputChar){
+        case '\r':
+            inputValue = atoi(inputString);
+            inputStringCounter = 0;
+            memset(inputString, 0, 8);
+            while(!pc.writable());
+            printf("\n");
+            while(!pc.writable());
+            printf("input value = %d\n", inputValue);
+            //return 1;
+        break;
+        default:
+            inputString[inputStringCounter] = inputChar;
+            inputStringCounter++;
+            if (inputStringCounter >= 8) {
+                inputStringCounter = 0;
+                memset(inputString, 0, 8);
+            }
+        break;
     }
-    picker.c620_read();
-    picker.c620_calc();
-}*/
-int16_t LagoriPicker::getCurrent(int motor_id){
-    picker.c620_read();
-    return picker.read_current[motor_id];
+
+        if(valueIsEnter){
+            Timer startupTime;
+            startupTime.start();
+            targetValue = inputValue;
+            while (std::chrono::duration<float>(startupTime.elapsed_time()).count() < 5) {
+                picker.CAN_Send(1000 * (targetValue > 0) - (targetValue < 0), 0, 0, 0, 0, 0, 0, 0);
+            }
+        }
+    }
 }
-void LagoriPicker::setVelocity(int motor_id, int speed){
-    picker.set_velocity(motor_id, speed);
-    picker.c620_calc();
+
+void LagoriPicker::PIControl(){
+    picker.c620_read();
+    outputCurrent += (float)(targetValue - picker.read_velocity[0]) * (float)0.05;
+    if(targetValue > 0 && outputCurrent < 150)
+        outputCurrent = 150;
+    if(targetValue == 0)
+        outputCurrent = 0;
+    if(picker.read_current[0] > 4000)
+        targetValue = 0;
+    picker.CAN_Send(outputCurrent, 0, 0, 0, 0, 0, 0, 0);
+}
+
+void LagoriPicker::pcOut(){
+    while(!pc.writable());
+    printf("velocity: %d, position: %d, current: %d, output current: %d, total position: %d\n", 
+        picker.read_velocity[0], picker.read_position[0], 
+        picker.read_current[0], outputCurrent, picker.global_pos[0]);
 }

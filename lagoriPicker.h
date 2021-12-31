@@ -5,12 +5,15 @@
 
 class LagoriPicker{
     public:
-    CAN canBus;
     LagoriPicker();
-    //void demonstration(unsigned char);
-    int16_t getCurrent(int);
-    void setVelocity(int, int);
+    void pcIn();
+    void PIControl();
+    void pcOut();
     private:
+    BufferedSerial pc;
     m3508 picker;
+    CAN canBus;
+    int targetValue;
+    int outputCurrent;
 };
 
