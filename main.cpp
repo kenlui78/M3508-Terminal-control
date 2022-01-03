@@ -5,9 +5,6 @@
 
 using namespace std::chrono;
 
-
-unsigned char g_stage = 0;
-
 DigitalOut onBoardLed(LED1);
 
 int main()
@@ -17,14 +14,13 @@ int main()
     Timer pcUpdate;
     motorUpdate.start();
     pcUpdate.start();
-
     while (1) {
         lagoriPicker.pcIn();
         if(duration_cast<milliseconds>(motorUpdate.elapsed_time()).count() > 1){
             lagoriPicker.PIControl();
             motorUpdate.reset();
         }
-        if(duration_cast<milliseconds>(pcUpdate.elapsed_time()).count() > 500){
+        if(duration_cast<milliseconds>(pcUpdate.elapsed_time()).count() > 200){
             lagoriPicker.pcOut();
             pcUpdate.reset();
         }
