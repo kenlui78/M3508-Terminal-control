@@ -7,6 +7,7 @@ using namespace std::chrono;
 
 DigitalOut onBoardLed(LED1);
 
+
 int main()
 {
     LagoriPicker lagoriPicker;
@@ -14,6 +15,7 @@ int main()
     Timer pcUpdate;
     motorUpdate.start();
     pcUpdate.start();
+    
     while (1) {
         lagoriPicker.pcIn();
         if(duration_cast<milliseconds>(motorUpdate.elapsed_time()).count() > 1){
@@ -26,4 +28,3 @@ int main()
         }
     }
 }
-

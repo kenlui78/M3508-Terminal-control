@@ -24,12 +24,12 @@ LagoriPicker::LagoriPicker() : canBus(PA_11, PA_12, 1000000), pc(USBTX, USBRX){
     pc.set_baud(115200);
 
     picker.global_pos[0] = 0;
-    initialPosition = picker.read_position[0];
-    lastPosition = initialPosition;
-    targetValue = 0;
+    lastPosition = picker.read_position[0];
+    targetVelocity = 0;
     outputCurrent = 0;
     inputValue = 0;
     controlType = 0;
+
 }
 
 void LagoriPicker::pcIn(){
@@ -64,7 +64,16 @@ void LagoriPicker::pcIn(){
             valueIsEnter = true;
             controlType = 2;
         break;
+        case 'i':
+            picker.global_pos[0] = 0;
+            lastPosition = picker.read_position[0];
 
+        case 'x':
+            inputValue = 0;
+            inputStringCounter = 0;
+            memset(inputString, 0, 8);
+            valueIsEnter = true;
+            controlType = 1;
         default:
             inputString[inputStringCounter] = inputChar;
             inputStringCounter++;
@@ -81,7 +90,7 @@ void LagoriPicker::pcIn(){
                 Timer startupTime;
                 startupTime.start();
                 while (chrono::duration_cast<std::chrono::microseconds>(startupTime.elapsed_time()).count() < 5) {
-                    picker.CAN_Send(1000 * sgn(targetValue), 0, 0, 0, 0, 0, 0, 0);
+                    picker.CAN_Send(1000 * sgn(targetVelocity), 0, 0, 0, 0, 0, 0, 0);
                 }
             }
         }
@@ -92,22 +101,28 @@ void LagoriPicker::pcIn(){
 void LagoriPicker::PIControl(){
     picker.c620_read();
     int presentValue = 0;
-    const float Kp = 5;
-    const float Ki = 5;
-    static int lastError = 0;
+    const float velocityKp = 5;
+    const float velocityKi = 5;
+    const float positionKp = 0.003;
+    const float positionKi = 0.003;
     switch (controlType) {
         case 1:
-        targetValue = inputValue;
+        targetVelocity = inputValue;
         break;
         case 2:{
-            int positionError = inputValue - picker.global_pos[0];
-                if(abs(positionError) > 1500)
-                    positionError = 1500;
-                targetValue = positionError;
+            static int lastPositionError = 0;
+            static int positionRegulate = 0;
+            int targetPosition = inputValue;
+            int presentPositionerror = (targetPosition - picker.global_pos[0]);
+            positionRegulate += presentPositionerror * positionKp - lastPositionError * positionKi;
+            lastPositionError = presentPositionerror;            
+                if(abs(positionRegulate) > 3000)
+                    positionRegulate = sgn(positionRegulate) * 3000;
+                targetVelocity = positionRegulate;
         break;
         }
         default:
-        targetValue = 0;
+        targetVelocity = 0;
         break;
     }
     /*
@@ -116,13 +131,17 @@ void LagoriPicker::PIControl(){
         outputCurrent = 150 * sgn(targetValue);
     if(targetValue == 0)
         outputCurrent = 0;
-    if(abs(picker.read_current[0]) > 4000)
-        targetValue = 4000;
-    */
-    int error = (targetValue - picker.read_velocity[0]);
-    outputCurrent += error * Kp - lastError * Ki;
-    lastError = error;
+        */
+    if(abs(picker.read_current[0]) > 16000){
+        targetVelocity = 0;
+        controlType = 1;
+    }
+    static int lastVelocityError = 0;
+    int presentVelocityerror = (targetVelocity - picker.read_velocity[0]);
+    outputCurrent += presentVelocityerror * velocityKp - lastVelocityError * velocityKi;
+    lastVelocityError = presentVelocityerror;
     picker.CAN_Send(outputCurrent, 0, 0, 0, 0, 0, 0, 0);
+
 
     int positionChange = picker.read_position[0] - lastPosition;
     lastPosition = picker.read_position[0];
@@ -140,4 +159,9 @@ void LagoriPicker::pcOut(){
         picker.read_current[0], outputCurrent, picker.global_pos[0]);
         
     //printf("%d %d\n", *time, picker.read_velocity[0]);
+}
+
+void LagoriPicker::setInitialPosition(){
+    picker.global_pos[0] = picker.read_position[0];
+    lastPosition = picker.global_pos[0];
 }

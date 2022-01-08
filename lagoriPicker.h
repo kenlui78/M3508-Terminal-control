@@ -13,13 +13,13 @@ class LagoriPicker{
     void pcIn();
     void PIControl();
     void pcOut();
+    void setInitialPosition();
     private:
     BufferedSerial pc;
     m3508 picker;
     CAN canBus;
-    int targetValue;
+    int targetVelocity;
     int outputCurrent;
-    int initialPosition;
     int lastPosition;
     int inputValue;
     int controlType;  //0: do not move, 1: velocity, 2:position
