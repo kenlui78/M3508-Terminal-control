@@ -58,7 +58,7 @@ class m3508
         int16_t read_current[8]={0};
         uint16_t read_position[8]={0};//value 0-8192 for c620, 0-8191 for c610
         int16_t read_velocity[8]={0};//value: rpm
-        
+         
         //Position Value
         int round_cnt[8] = {0};
         int16_t last_pos[8] = {0};
