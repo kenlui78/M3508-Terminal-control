@@ -11,6 +11,7 @@ DigitalOut onBoardLed(LED1);
 int main()
 {
     //LagoriPicker lagoriPicker;
+    Picker picker();
     Timer motorUpdate;
     Timer pcUpdate;
     motorUpdate.start();

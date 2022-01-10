@@ -7,36 +7,27 @@
 #define positionKp 0.003
 #define positionKi 0.003
 
-class MotorData{
+template <typename T> int sgn(T val) {
+	return (T(0) < val) - (val < T(0));
+}
+
+class Motor{
 public:
-    MotorData(unsigned int);
+Motor(unsigned int);
     const unsigned int ID;//from 1 to 8
     int16_t rotorAngle;
     int16_t rotationSpeed;
     int16_t torqueCurrent;
     int8_t motorTemperature;
-};
-class Controller{
-public:
-    Controller(MotorData&);
-    void (*compute)(void);
-private:
-    int16_t lastError;
-    int16_t effort;
-    int16_t setPoint;
-    void speedController();
-    void positionController();
-    MotorData* motorData;
-};
-
-class Motor{
-public:
-    Motor(unsigned int);
-
-    MotorData data;
-
     int position;
-    Controller controller;
+    int speedSetPoint;
+    int speedEffort;
+    int positionSetPoint;
+    int positionEffort;
+
+    //void Motor::*feedback)();
+    void velocityControl();
+    void positionControl();    
 };
 
 class Picker {
@@ -47,9 +38,11 @@ public:
 private:
     //Motor elevator[4];
     //Motor flipper[4];
-    vector<Motor> elevator;//4 in total. contorl ID from 1 to 4
-    vector<Motor> flipper;//4 in total. control ID from 5 to 8
+    vector<Motor> motor;//8 in total. contorl ID from 1 to 8. 1 to 4 is the fliper. 5 to 8 is the elevator
     CAN cAN;
+    CANMessage msgRead;
+    CANMessage sendingMsgFlipper;
+    CANMessage sendingMsgElevator;
 };
 class Chassis {
 public:
