@@ -17,7 +17,7 @@ int main()
     motorUpdate.start();
     pcUpdate.start();
     while (1) {
-        if(duration_cast<milliseconds>(motorUpdate.elapsed_time()).count() > 1){
+        if(duration_cast<milliseconds>(motorUpdate.elapsed_time()).count() > 100){
             picker.loop();
         }
         if(duration_cast<milliseconds>(pcUpdate.elapsed_time()).count() > 100){
