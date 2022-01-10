@@ -18,9 +18,10 @@ class LagoriPicker{
     BufferedSerial pc;
     m3508 picker;
     CAN canBus;
+    int targetMotor;
     int targetVelocity;
     int outputCurrent;
-    int lastPosition;
+    int lastPosition[8];
     int inputValue;
     int controlType;  //0: do not move, 1: velocity, 2:position
 };
