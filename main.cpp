@@ -19,6 +19,7 @@ int main()
     while (1) {
         if(duration_cast<milliseconds>(motorUpdate.elapsed_time()).count() > 100){
             picker.loop();
+            motorUpdate.reset();
         }
         if(duration_cast<milliseconds>(pcUpdate.elapsed_time()).count() > 100){
             printf("speed[0]: %d, angle[0]: %d, effort: %d, speedSetPoint: %d\n", 
