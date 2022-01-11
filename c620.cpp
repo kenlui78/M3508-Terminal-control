@@ -106,21 +106,6 @@ bool Picker::findZero(){
 
 void Picker::loop(){
     read();
-    switch (state) {
-    case 0:{
-        for (int i = 0; i < 4; i++) {
-            motor[i].speedSetPoint = 200;
-            motor[i].speedControl();
-        }
-        //state++;
-    }break;
-    case 1:{
-        if(findZero()){
-            state++;
-        }
-    }break;
-    default:
-    break;
-    }
+    //motor[0].speedControl();
     write();
 }
