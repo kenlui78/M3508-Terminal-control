@@ -2,10 +2,10 @@
 #include "mbed.h"
 #include <cstdint>
 #include <vector>
-#define speedKp 1
-#define speedKi 1
-#define positionKp 0.003
-#define positionKi 0.003
+#define speedKp 5
+#define speedKi 5
+#define positionKp 0.1
+#define positionKi 0.1
 
 template <typename T> int sgn(T val) {
 	return (T(0) < val) - (val < T(0));
@@ -25,11 +25,13 @@ Motor(unsigned int);
     int speedSetPoint;
     int effort;
     int positionSetPoint;
-    int positionEffort;
     int lastSpeedError;
+    int lastAngle;
     void speedControl();
     void positionControl();
     void updatePosition();
+private:
+    const int maxCurrent = 15000;
 };
 
 class Picker {

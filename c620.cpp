@@ -14,8 +14,11 @@ Motor::Motor(unsigned int id): ID(id){
 
 void Motor::speedControl(){
     int error = (speedSetPoint - rotationSpeed);
-    effort += error * 5 - lastSpeedError * 5;
+    effort += error * speedKp - lastSpeedError * speedKi;
     lastSpeedError = error;
+    if (abs(effort) > maxCurrent) {
+        effort = sgn(effort) * maxCurrent;
+    }
 }
 
 void Motor::positionControl(){
@@ -28,7 +31,6 @@ void Motor::positionControl(){
 }
 
 void Motor::updatePosition(){
-    static int lastAngle = rotorAngle;
     int angleChange = rotorAngle - lastAngle;
     lastAngle = rotorAngle;
     if(abs(angleChange) > 4000){
