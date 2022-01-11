@@ -8,14 +8,14 @@ Motor::Motor(unsigned int id): ID(id){
     torqueCurrent = 0;
     motorTemperature = 0;
     effort = 0;
+    lastSpeedError = 0;
 }
 
 
 void Motor::speedControl(){
-    static int lastSpeedError = 0;
-    int speedError = speedSetPoint - rotationSpeed;
-    effort = speedError * speedKp;
-    lastSpeedError = speedError;
+    int error = (speedSetPoint - rotationSpeed);
+    effort += error * 5 - lastSpeedError * 5;
+    lastSpeedError = error;
 }
 
 void Motor::positionControl(){

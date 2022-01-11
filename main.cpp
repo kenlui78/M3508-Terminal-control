@@ -30,31 +30,23 @@ int storeChar(char inputChar){
     }
     return inputValue;
 }
-
 int main()
 {
-    //LagoriPicker lagoriPicker;
     Picker picker;
     Timer motorUpdate;
     Timer pcUpdate;
     motorUpdate.start();
     pcUpdate.start();
-    char buffer[20];
-    BufferedSerial pc(USBTX, USBRX);
+    picker.motor[0].speedSetPoint = 500;
+    picker.motor[1].speedSetPoint = 500;
+
     while (1) {
-        if(duration_cast<milliseconds>(motorUpdate.elapsed_time()).count() > 100){
-            picker.loop();
+        if(duration_cast<milliseconds>(motorUpdate.elapsed_time()).count() > 1){
+            picker.read();
+            picker.motor[0].speedControl();
+            picker.motor[1].speedControl();
+            picker.write();
             motorUpdate.reset();
-        }
-        if (pc.readable()) {
-            pc.read(buffer, 1);
-            picker.motor[0].effort = storeChar(buffer[0]);
-        }
-        if(duration_cast<milliseconds>(pcUpdate.elapsed_time()).count() > 100){
-            //printf("speed[0]: %d, angle[0]: %d, effort: %d, speedSetPoint: %d\n", 
-            //        picker.motor[0].rotationSpeed, picker.motor[0].rotorAngle, picker.motor[0].effort, picker.motor[0].speedSetPoint);
-            printf("%d\n", picker.motor[0].rotationSpeed);
-            pcUpdate.reset();
         }
     }
 }

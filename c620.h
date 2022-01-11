@@ -26,7 +26,7 @@ Motor(unsigned int);
     int effort;
     int positionSetPoint;
     int positionEffort;
-
+    int lastSpeedError;
     void speedControl();
     void positionControl();
     void updatePosition();
